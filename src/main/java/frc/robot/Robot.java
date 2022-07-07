@@ -137,10 +137,10 @@ public class Robot extends TimedRobot {
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
   public void alignRobot(double horizontalError) {
-    if (horizontalError < -1) {
+    if (horizontalError < 0 && Math.abs(horizontalError) > 2) {
       rightMotors.set(-.1);
       leftMotors.set(-.1);
-    } else if (horizontalError > 1) {
+    } else if (horizontalError > 0 && Math.abs(horizontalError) > 2) {
       rightMotors.set(0.1);
       leftMotors.set(0.1);
     }
