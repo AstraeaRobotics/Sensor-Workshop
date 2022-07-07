@@ -5,8 +5,32 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.KebabCaseStrategy;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Robot extends TimedRobot {
+  //NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTableEntry tx = table.getEntry("tx");
+  NetworkTableEntry tv = table.getEntry("tx");
+
+  CANSparkMax rightMaster = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax rightFollow1 = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax rightFollow2 = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax leftMaster = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax leftFollow1 = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax leftFollow2 = new CANSparkMax(6, CANSparkMaxLowLevel.MotorType.kBrushless);
+
+  MotorControllerGroup leftMotors = new MotorControllerGroup(leftMaster, leftFollow1, leftFollow2);
+  MotorControllerGroup rightMotors = new MotorControllerGroup(rightMaster, rightFollow1, rightFollow2);
 
   @Override
   public void robotInit() {
@@ -22,6 +46,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    if (!isAligned()) {
+      alignRobot(getHorizontalOffset());
+    }
   }
 
   /* COLOR SENSOR STATION */
@@ -70,7 +97,8 @@ public class Robot extends TimedRobot {
    */
   public boolean existsTarget() {
     // TODO write method
-    return false;
+    boolean v = tv.getBoolean(false);
+    return v;
   }
 
   /**
@@ -81,7 +109,8 @@ public class Robot extends TimedRobot {
    */
   public double getHorizontalOffset() {
     // TODO write method
-    return -1.0;
+    double x = tx.getDouble(0.0);
+    return x;
   }
 
   /**
@@ -91,6 +120,11 @@ public class Robot extends TimedRobot {
    */
   public boolean isAligned() {
     // TODO write method
+    double x = getHorizontalOffset();
+    if (x == 0)
+    {
+      return true;
+    }
     return false;
   }
 
@@ -100,7 +134,13 @@ public class Robot extends TimedRobot {
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
   public void alignRobot(double horizontalError) {
-    // TODO write method
+    if (horizontalError < 0) {
+      rightMotors.set(.2);
+      leftMotors.set(.2);
+    } else if (horizontalError > 0) {
+      rightMotors.set(-0.2);
+      leftMotors.set(-0.2);
+    }
   }
 
   /**
