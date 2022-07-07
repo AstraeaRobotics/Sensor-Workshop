@@ -128,6 +128,15 @@ public class Robot extends TimedRobot {
   }
 
   /**
+   * Turns the robot to a specified angle
+   * 
+   * @param degrees angle in degrees
+   */
+  public void turnToAngle(double degrees) {
+    // TODO write method
+  }
+
+  /**
    * Moves the robot a specified distance forwards or backwards
    * 
    * @param distance distance in meters (can be negative to move the robot
@@ -153,5 +162,12 @@ public class Robot extends TimedRobot {
   public double getDistanceTraveled() {
     // TODO write method
     return 0.0;
+  }
+
+  /**
+   * Logs important position data, like angle and position (x and y coordinates)
+   */
+  public void logPositionToDashboard() {
+    // TODO write method
   }
 }
