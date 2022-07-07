@@ -124,7 +124,7 @@ public class Robot extends TimedRobot {
   public boolean isAligned() {
     // TODO write method
     double x = getHorizontalOffset();
-    if (x == 0)
+    if (Math.abs(x) <= 2)
     {
       return true;
     }
