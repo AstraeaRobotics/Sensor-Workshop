@@ -48,6 +48,9 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     if (!isAligned()) {
       alignRobot(getHorizontalOffset());
+    } else {
+      rightMotors.set(0);
+      leftMotors.set(0);
     }
   }
 
@@ -134,12 +137,12 @@ public class Robot extends TimedRobot {
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
   public void alignRobot(double horizontalError) {
-    if (horizontalError < 0) {
-      rightMotors.set(.2);
-      leftMotors.set(.2);
-    } else if (horizontalError > 0) {
-      rightMotors.set(-0.2);
-      leftMotors.set(-0.2);
+    if (horizontalError < 1) {
+      rightMotors.set(-.1);
+      leftMotors.set(-.1);
+    } else if (horizontalError > -1) {
+      rightMotors.set(0.1);
+      leftMotors.set(0.1);
     }
   }
 
