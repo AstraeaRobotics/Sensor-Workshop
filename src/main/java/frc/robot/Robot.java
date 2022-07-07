@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
   }
 
   /**
-   * Logs values to SmartDashboard
+   * Logs important color sensor values to SmartDashboard
    * 
    * @param proximity How close the nearest object is to the sensor
    * @param color     What color is detected by the sensor
@@ -165,9 +165,9 @@ public class Robot extends TimedRobot {
   }
 
   /**
-   * Logs important position data, like angle and position (x and y coordinates)
+   * Logs important position values to SmartDashboard
    */
-  public void logPositionToDashboard() {
+  public void logToDashboard(double xPos, double yPos, double rotation) {
     // TODO write method
   }
 }
