@@ -124,7 +124,7 @@ public class Robot extends TimedRobot {
   public boolean isAligned() {
     // TODO write method
     double x = getHorizontalOffset();
-    if (Math.abs(x) <= 2)
+    if (Math.abs(x) <= 5)
     {
       return true;
     }
@@ -138,11 +138,11 @@ public class Robot extends TimedRobot {
    */
   public void alignRobot(double horizontalError) {
     if (horizontalError < 0) {
-      rightMotors.set(-.1);
-      leftMotors.set(-.1);
+      rightMotors.set(-.05);
+      leftMotors.set(-.05);
     } else if (horizontalError > 0) {
-      rightMotors.set(0.1);
-      leftMotors.set(0.1);
+      rightMotors.set(0.05);
+      leftMotors.set(0.05);
     }
   }
 
