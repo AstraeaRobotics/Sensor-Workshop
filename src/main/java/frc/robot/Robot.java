@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.lang.Math;
 
 public class Robot extends TimedRobot {
@@ -40,12 +40,15 @@ public class Robot extends TimedRobot {
     motor6 = new CANSparkMax(6, CANSparkMaxLowLevel.MotorType.kBrushless);
     leftMotors = new MotorControllerGroup(motor1, motor2, motor3);
     rightMotors = new MotorControllerGroup(motor4, motor5, motor6);
+    gyro = new AHRS();
+    odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
   }
 
   @Override
   public void robotPeriodic() {
     moveDistance(5);
-
+    updateOdometry();
+    logToDashboard(0,0,0);
   }
 
   @Override
@@ -233,6 +236,9 @@ public class Robot extends TimedRobot {
    * Logs important position values to SmartDashboard
    */
   public void logToDashboard(double xPos, double yPos, double rotation) {
-    // TODO write method
+    SmartDashboard.putNumber("x Positon", odometer.getPoseMeters().getX());
+    SmartDashboard.putNumber("y Positon", odometer.getPoseMeters().getY());
+    SmartDashboard.putNumber("Rotation", gyro.getAngle());
+    SmartDashboard.putNumber("Left Encoder", motor1.getEncoder().getPosition());
   }
 }
