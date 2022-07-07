@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -11,6 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.KebabCaseStrategy;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import com.revrobotics.ColorSensorV3;
+import com.revrobotics.ColorSensorV3.RawColor;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -31,6 +34,9 @@ public class Robot extends TimedRobot {
 
   MotorControllerGroup leftMotors = new MotorControllerGroup(leftMaster, leftFollow1, leftFollow2);
   MotorControllerGroup rightMotors = new MotorControllerGroup(rightMaster, rightFollow1, rightFollow2);
+
+  private final I2C.Port i2cPort = I2C.Port.kOnboard;
+  ColorSensorV3 colorSense = new ColorSensorV3(i2cPort);
 
   @Override
   public void robotInit() {
@@ -67,7 +73,7 @@ public class Robot extends TimedRobot {
    */
   public int getProximity() {
     // TODO write method
-    return -1;
+    return colorSense.getProximity();
   }
 
   /**
@@ -78,7 +84,19 @@ public class Robot extends TimedRobot {
    */
   public ColorChoices getDetectedColor() {
     // TODO write method
-    return null;
+    RawColor c = colorSense.getRawColor();
+    int red = c.red;
+    int green = c.green;
+    int blue = c.blue;
+
+    if (red > (green+blue)/2) {
+      return ColorChoices.RED;
+    } else if (blue > (red+green)/2) {
+      return ColorChoices.BLUE;
+    } else if (red+green+blue > 0) {
+      return ColorChoices.OTHER;
+    }
+    return ColorChoices.NONE;
   }
 
   /**
