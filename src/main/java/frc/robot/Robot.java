@@ -5,15 +5,27 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.I2C;
+
+import com.revrobotics.ColorSensorV3;
 
 public class Robot extends TimedRobot {
 
+  I2C.Port i2cPort = I2C.Port.kOnboard;
+
+  ColorSensorV3 colorSensor;
+
   @Override
   public void robotInit() {
+    colorSensor = new ColorSensorV3(i2cPort);
   }
 
   @Override
   public void robotPeriodic() {
+    logToDashboard(getProximity(), getDetectedColor());
   }
 
   @Override
@@ -37,7 +49,7 @@ public class Robot extends TimedRobot {
    */
   public int getProximity() {
     // TODO write method
-    return -1;
+    return colorSensor.getProximity();
   }
 
   /**
@@ -48,7 +60,15 @@ public class Robot extends TimedRobot {
    */
   public ColorChoices getDetectedColor() {
     // TODO write method
-    return null;
+    int blueColorValue = colorSensor.getBlue();
+    int redColorValue = colorSensor.getRed();
+    if (blueColorValue > redColorValue) {
+      return ColorChoices.BLUE;
+    } else if (blueColorValue < redColorValue) {
+      return ColorChoices.RED;
+    } else {
+      return ColorChoices.NONE;
+    }
   }
 
   /**
@@ -59,6 +79,9 @@ public class Robot extends TimedRobot {
    */
   public void logToDashboard(int proximity, ColorChoices color) {
     // TODO write method
+    ShuffleboardTab colorTab = Shuffleboard.getTab("Color");
+    colorTab.add("Color", color.toString());
+    colorTab.add("Proximity", proximity);
   }
 
   /* LIMELIGHT STATION */
