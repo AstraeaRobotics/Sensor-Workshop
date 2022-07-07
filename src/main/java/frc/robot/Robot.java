@@ -4,16 +4,48 @@
 
 package frc.robot;
 
+import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+
+import java.lang.Math;
 
 public class Robot extends TimedRobot {
 
+  public static CANSparkMax motor1;
+  public static CANSparkMax motor2;
+  public static CANSparkMax motor3;
+  public static CANSparkMax motor4;
+  public static CANSparkMax motor5;
+  public static CANSparkMax motor6;
+
+  public static MotorControllerGroup leftMotors;
+  public static MotorControllerGroup rightMotors;
+
+  public static DifferentialDriveOdometry odometer;
+  public static AHRS gyro;
+
+
   @Override
   public void robotInit() {
+    motor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor2 = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor3 = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor4 = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor5 = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor6 = new CANSparkMax(6, CANSparkMaxLowLevel.MotorType.kBrushless);
+    leftMotors = new MotorControllerGroup(motor1, motor2, motor3);
+    rightMotors = new MotorControllerGroup(motor4, motor5, motor6);
   }
 
   @Override
   public void robotPeriodic() {
+    moveDistance(5);
+
   }
 
   @Override
@@ -102,7 +134,6 @@ public class Robot extends TimedRobot {
   public void alignRobot(double horizontalError) {
     // TODO write method
   }
-
   /**
    * Logs important Limelight values to SmartDashboard
    * 
@@ -123,8 +154,7 @@ public class Robot extends TimedRobot {
    * @return the yaw angle in degrees
    */
   public double getHeading() {
-    // TODO write method
-    return 0.0;
+    return gyro.getAngle();
   }
 
   /**
@@ -133,7 +163,21 @@ public class Robot extends TimedRobot {
    * @param degrees angle in degrees
    */
   public void turnToAngle(double degrees) {
-    // TODO write method
+    double currRotat = getHeading();
+    if (degrees < 0) {
+      if (currRotat < degrees) {
+        leftMotors.set(0.3);
+        rightMotors.set(0.3);
+      }
+    } else if (degrees > 0) {
+      if (currRotat < degrees) {
+        leftMotors.set(-0.3);
+        rightMotors.set(-0.3);
+      } 
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /**
@@ -143,7 +187,22 @@ public class Robot extends TimedRobot {
    *                 backwards)
    */
   public void moveDistance(double distance) {
-    // TODO write method
+    double currPosit = motor1.getEncoder().getPosition();
+    if (distance < 0) {
+      if (currPosit < distance) {
+        leftMotors.set(0.3);
+        rightMotors.set(-0.3);
+      }
+    } else if (distance > 0) {
+      if (currPosit < distance) {
+        leftMotors.set(-0.3);
+        rightMotors.set(0.3);
+      } 
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
+
   }
 
   /**
@@ -151,7 +210,10 @@ public class Robot extends TimedRobot {
    * 
    */
   public void updateOdometry() {
-    // TODO write method
+    double metersMoved = 0.1524 * Math.PI / 10.81;
+    double positionR = motor4.getEncoder().getPosition();
+    double positionL = motor1.getEncoder().getPosition();
+    odometer.update(gyro.getRotation2d(), positionL * metersMoved, positionR * metersMoved);
   }
 
   /**
@@ -160,8 +222,11 @@ public class Robot extends TimedRobot {
    * @return distance in meters
    */
   public double getDistanceTraveled() {
-    // TODO write method
-    return 0.0;
+    double x = odometer.getPoseMeters().getX();
+    double y = odometer.getPoseMeters().getY();
+    double hypotenuseSquared = Math.pow(x,2) + Math.pow(y,2);
+    double hypotenuse = Math.pow(hypotenuseSquared, 0.5);
+    return hypotenuse;
   }
 
   /**
