@@ -84,6 +84,13 @@ public class Robot extends TimedRobot {
       leftMotors.set(0);
       rightMotors.set(0);
     }
+
+    if (joystick.getCircleButton()) {
+      moveDistance(5);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /* COLOR SENSOR STATION */
