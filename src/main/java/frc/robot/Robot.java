@@ -18,6 +18,9 @@ import java.lang.Math;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.ColorSensorV3.RawColor;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Robot extends TimedRobot {
 
@@ -36,6 +39,10 @@ public class Robot extends TimedRobot {
   public static ColorSensorV3 sensor;
   public static I2C.Port I2C;
 
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTableEntry tv = table.getEntry("tv");
+  NetworkTableEntry tx = table.getEntry("tx");
+
   @Override
   public void robotInit() {
     motor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -51,6 +58,7 @@ public class Robot extends TimedRobot {
     gyro.reset();
     motor1.getEncoder().setPosition(0.0);
     sensor = new ColorSensorV3(Port.kOnboard);
+
   }
 
   @Override
@@ -123,8 +131,7 @@ public class Robot extends TimedRobot {
    * @return whether or not a target is visible in the frame
    */
   public boolean existsTarget() {
-    // TODO write method
-    return false;
+    return tv.getBoolean(false);
   }
 
   /**
@@ -134,8 +141,8 @@ public class Robot extends TimedRobot {
    * @return the horizontal offset to the center of the target
    */
   public double getHorizontalOffset() {
-    // TODO write method
-    return -1.0;
+    double xoffset = tx.getDouble(0.0);
+    return xoffset;
   }
 
   /**
@@ -144,8 +151,10 @@ public class Robot extends TimedRobot {
    * @return if the robot is aligned with the goal
    */
   public boolean isAligned() {
-    // TODO write method
-    return false;
+    if (getHorizontalOffset() == 0)
+      return true;
+    else
+      return false;
   }
 
   /**
@@ -154,7 +163,16 @@ public class Robot extends TimedRobot {
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
   public void alignRobot(double horizontalError) {
-    // TODO write method
+    if (getHorizontalOffset() < 0) {
+      leftMotors.set(0.1);
+      rightMotors.set(0.1);
+    } else if (getHorizontalOffset() > 0) {
+      leftMotors.set(-0.1);
+      rightMotors.set(-0.1);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /**
