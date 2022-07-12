@@ -14,7 +14,8 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.lang.Math;
 import com.revrobotics.ColorSensorV3;
-import edu.wpi.first.wpilibj.I2C.Port port;
+import com.revrobotics.ColorSensorV3.RawColor;
+import edu.wpi.first.wpilibj.I2C.Port;
 
 public class Robot extends TimedRobot {
 
@@ -81,14 +82,19 @@ public class Robot extends TimedRobot {
 
   /**
    * Determines which color is closest to the color detected by the sensor
+   * @return 
    * 
    * @return The color that is closest to what the color sensor detects (RED,
    *         BLUE, OTHER or NONE)
    */
   public ColorChoices getDetectedColor() {
-    // TODO write method
-    return sensor.getRawColor();
-  }
+    int red = sensor.getRed();
+    int blue = sensor.getBlue();
+    if (red > blue)
+      return ColorChoices.RED;
+    else if (blue > red)
+      return ColorChoices.BLUE;
+    }
 
   /**
    * Logs important color sensor values to SmartDashboard
@@ -96,11 +102,10 @@ public class Robot extends TimedRobot {
    * @param proximity How close the nearest object is to the sensor
    * @param color     What color is detected by the sensor
    */
-  public void logToDashboard(int proximity, ColorChoices color) {
+  public void logToDashboard2(int proximity, ColorChoices color) {
     // TODO write method
     SmartDashboard.putNumber("Proxmity", sensor.getProximity());
-    SmartDashboard.putNumber("Raw Color", sensor.getRawColor());
-  }
+    SmartDashboard.putString("Color", getDetectedColor().toString());
 
   /* LIMELIGHT STATION */
 
