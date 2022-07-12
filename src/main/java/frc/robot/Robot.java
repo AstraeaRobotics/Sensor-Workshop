@@ -97,7 +97,8 @@ public class Robot extends TimedRobot {
       return ColorChoices.RED;
     else if (blue > red)
       return ColorChoices.BLUE;
-    return ColorChoices.NONE;
+    else
+      return ColorChoices.NONE;
     }
 
   /**
