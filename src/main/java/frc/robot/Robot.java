@@ -96,7 +96,7 @@ public class Robot extends TimedRobot {
    * @param proximity How close the nearest object is to the sensor
    * @param color     What color is detected by the sensor
    */
-  public void logToDashboard(int proximity, ColorChoices color) {
+  public void logToDashboard2(int proximity, ColorChoices color) {
     // TODO write method
     SmartDashboard.putNumber("Proxmity", sensor.getProximity());
     SmartDashboard.putNumber("Raw Color", sensor.getRawColor());
@@ -246,5 +246,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("y Positon", odometer.getPoseMeters().getY());
     SmartDashboard.putNumber("Rotation", gyro.getAngle());
     SmartDashboard.putNumber("Left Encoder", motor1.getEncoder().getPosition());
+  }
+
+  public void logToDashboard2(int proximity, ColorChoices color){
+    SmartDashboard.putNumber("Proximity", sensor.getProximity());
+    SmartDashboard.putNumber("Raw Color", sensor.getRawColor());
   }
 }
