@@ -55,6 +55,7 @@ public class Robot extends TimedRobot {
     gyro.reset();
     rightMEnc.setPosition(0.0);
     leftMEnc.setPosition(0.0);
+    SmartDashboard.putNumber("gyro", gyro.getAngle());
   }
 
   @Override
@@ -242,14 +243,13 @@ public class Robot extends TimedRobot {
     // TODO write method
     //use getHeading() here
     double heading = getHeading();
-    double degDiff = heading - degrees;
-    if (degDiff < 0) {
+    if (heading < degrees) {
       // Reminder: Motors are positioned in opposite directions, so yah
-      leftMotors.set(-0.1);
-      rightMotors.set(-0.1);
-    } else if (degDiff > 0) {
       leftMotors.set(0.1);
       rightMotors.set(0.1);
+    } else if (heading > degrees) {
+      leftMotors.set(-0.1);
+      rightMotors.set(-0.1);
     } else {
      leftMotors.set(0);
      rightMotors.set(0);
