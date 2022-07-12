@@ -20,6 +20,8 @@ import com.revrobotics.CANSparkMaxLowLevel;
 
 import com.revrobotics.ColorSensorV3;
 
+import com.kauailabs.navx.frc.AHRS;
+
 public class Robot extends TimedRobot {
 
   I2C.Port i2cPort = I2C.Port.kOnboard;
@@ -42,6 +44,8 @@ public class Robot extends TimedRobot {
   MotorControllerGroup leftMotors;
   MotorControllerGroup rightMotors;
 
+  AHRS gyro;
+
   @Override
   public void robotInit() {
     colorSensor = new ColorSensorV3(i2cPort);
@@ -59,6 +63,8 @@ public class Robot extends TimedRobot {
 
     leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2, leftMotor3);
     rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2, rightMotor3);
+
+    // gryo = new AHRwS()
   }
 
   @Override
@@ -72,7 +78,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    if (joystick.getCrossButton()){
+    if (joystick.getCrossButton()) {
       alignRobot(getHorizontalOffset());
     }
   }
@@ -146,7 +152,7 @@ public class Robot extends TimedRobot {
    */
   public boolean existsTarget() {
     // TODO write method
-    
+
     return limelightTable.getEntry("tv").getDouble(0) == 1;
   }
 
@@ -167,8 +173,7 @@ public class Robot extends TimedRobot {
    * @return if the robot is aligned with the goal
    */
   public boolean isAligned() {
-    // TODO write method
-    return (Math.abs(getHorizontalOffset()) <= 5); 
+    return (Math.abs(getHorizontalOffset()) <= 5);
   }
 
   /**
@@ -207,8 +212,9 @@ public class Robot extends TimedRobot {
    * @return the yaw angle in degrees
    */
   public double getHeading() {
-    // TODO write method
+
     return 0.0;
+
   }
 
   /**
