@@ -79,8 +79,8 @@ public class Robot extends TimedRobot {
     // var proximity = getProximity();
     // logToDashboard(proximity, color);
 
-    //turnToAngle(90);
-    moveDistance(1);
+    turnToAngle(90);
+    //moveDistance(1);
     logToDashboard(odometry.getPoseMeters().getX(), odometry.getPoseMeters().getY(), getHeading());
   }
 
