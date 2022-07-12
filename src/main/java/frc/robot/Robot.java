@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies.KebabCaseStrategy
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.ColorSensorV3;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ColorSensorV3.RawColor;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -38,6 +39,8 @@ public class Robot extends TimedRobot {
   private final I2C.Port i2cPort = I2C.Port.kOnboard;
   ColorSensorV3 colorSense = new ColorSensorV3(i2cPort);
 
+  RelativeEncoder rightMEnc = rightMaster.getEncoder();
+
   @Override
   public void robotInit() {
   }
@@ -52,12 +55,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    if (!isAligned()) {
-      alignRobot(getHorizontalOffset());
-    } else {
-      rightMotors.set(0);
-      leftMotors.set(0);
-    }
+    // if (!isAligned()) {
+    //   alignRobot(getHorizontalOffset());
+    // } else {
+    //   rightMotors.set(0);
+    //   leftMotors.set(0);
+    // }
+    var color = getDetectedColor();
+    var proximity = getProximity();
+    logToDashboard(proximity, color);
   }
 
   /* COLOR SENSOR STATION */
@@ -88,15 +94,17 @@ public class Robot extends TimedRobot {
     int red = c.red;
     int green = c.green;
     int blue = c.blue;
+    SmartDashboard.putNumber("REDDDDDD", red);
+    SmartDashboard.putNumber("GREEEEEEEEN", green);
+    SmartDashboard.putNumber("BLUEeee", blue);
 
-    if (red > (green+blue)/2) {
+    if (Math.max(red, green) == red && Math.max(red, blue) == red) {
       return ColorChoices.RED;
-    } else if (blue > (red+green)/2) {
+    } else if (Math.max(blue, red) == blue && Math.max(blue, green) == blue){
       return ColorChoices.BLUE;
-    } else if (red+green+blue > 0) {
-      return ColorChoices.OTHER;
-    }
-    return ColorChoices.NONE;
+    } else {
+      return ColorChoices.NONE;
+    }  
   }
 
   /**
@@ -106,7 +114,18 @@ public class Robot extends TimedRobot {
    * @param color     What color is detected by the sensor
    */
   public void logToDashboard(int proximity, ColorChoices color) {
-    // TODO write method
+    switch (color) {
+      case BLUE:
+        SmartDashboard.putString("Color", "Blue");
+      case RED:
+        SmartDashboard.putString("Color", "Red");
+      case OTHER:
+        SmartDashboard.putString("Color", "Other");
+      case NONE:
+        SmartDashboard.putString("Color", "None");
+      default:
+        SmartDashboard.putString("Color", "None");
+    }
   }
 
   /* LIMELIGHT STATION */
@@ -117,7 +136,6 @@ public class Robot extends TimedRobot {
    * @return whether or not a target is visible in the frame
    */
   public boolean existsTarget() {
-    // TODO write method
     boolean v = tv.getBoolean(false);
     return v;
   }
@@ -129,7 +147,6 @@ public class Robot extends TimedRobot {
    * @return the horizontal offset to the center of the target
    */
   public double getHorizontalOffset() {
-    // TODO write method
     double x = tx.getDouble(0.0);
     return x;
   }
@@ -140,7 +157,6 @@ public class Robot extends TimedRobot {
    * @return if the robot is aligned with the goal
    */
   public boolean isAligned() {
-    // TODO write method
     double x = getHorizontalOffset();
     if (Math.abs(x) <= 5)
     {
