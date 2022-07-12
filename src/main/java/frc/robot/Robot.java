@@ -9,13 +9,15 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.lang.Math;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.ColorSensorV3.RawColor;
-import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.I2C;
 
 public class Robot extends TimedRobot {
 
@@ -32,6 +34,7 @@ public class Robot extends TimedRobot {
   public static DifferentialDriveOdometry odometer;
   public static AHRS gyro;
   public static ColorSensorV3 sensor;
+  public static I2C.Port I2C;
 
 
   @Override
@@ -47,8 +50,8 @@ public class Robot extends TimedRobot {
     gyro = new AHRS();
     odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
     gyro.reset();
-    motor1.getEncoder().setPosition(.0);
-    sensor = new ColorSensorV3();
+    motor1.getEncoder().setPosition(0.0);
+    sensor = new ColorSensorV3(Port.kOnboard);
   }
 
   @Override
@@ -94,6 +97,7 @@ public class Robot extends TimedRobot {
       return ColorChoices.RED;
     else if (blue > red)
       return ColorChoices.BLUE;
+    return ColorChoices.NONE;
     }
 
   /**
@@ -106,6 +110,7 @@ public class Robot extends TimedRobot {
     // TODO write method
     SmartDashboard.putNumber("Proxmity", sensor.getProximity());
     SmartDashboard.putString("Color", getDetectedColor().toString());
+  }
 
   /* LIMELIGHT STATION */
 
@@ -251,10 +256,5 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("y Positon", odometer.getPoseMeters().getY());
     SmartDashboard.putNumber("Rotation", gyro.getAngle());
     SmartDashboard.putNumber("Left Encoder", motor1.getEncoder().getPosition());
-  }
-
-  public void logToDashboard2(int proximity, ColorChoices color){
-    SmartDashboard.putNumber("Proximity", sensor.getProximity());
-    SmartDashboard.putNumber("Raw Color", sensor.getRawColor());
   }
 }
