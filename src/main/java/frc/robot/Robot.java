@@ -42,6 +42,8 @@ public class Robot extends TimedRobot {
     rightMotors = new MotorControllerGroup(motor4, motor5, motor6);
     gyro = new AHRS();
     odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
+    gyro.reset();
+    motor1.getEncoder().setPosition(.0);
   }
 
   @Override
@@ -169,13 +171,13 @@ public class Robot extends TimedRobot {
     double currRotat = getHeading();
     if (degrees < 0) {
       if (currRotat < degrees) {
-        leftMotors.set(0.3);
-        rightMotors.set(0.3);
+        leftMotors.set(0.15);
+        rightMotors.set(0.15);
       }
     } else if (degrees > 0) {
       if (currRotat < degrees) {
-        leftMotors.set(-0.3);
-        rightMotors.set(-0.3);
+        leftMotors.set(-0.15);
+        rightMotors.set(-0.15);
       } 
     } else {
       leftMotors.set(0);
@@ -193,13 +195,13 @@ public class Robot extends TimedRobot {
     double currPosit = motor1.getEncoder().getPosition();
     if (distance < 0) {
       if (currPosit < distance) {
-        leftMotors.set(0.3);
-        rightMotors.set(-0.3);
+        leftMotors.set(0.15);
+        rightMotors.set(-0.15);
       }
     } else if (distance > 0) {
       if (currPosit < distance) {
-        leftMotors.set(-0.3);
-        rightMotors.set(0.3);
+        leftMotors.set(-0.15);
+        rightMotors.set(0.15);
       } 
     } else {
       leftMotors.set(0);
