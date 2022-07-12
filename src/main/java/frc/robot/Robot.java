@@ -63,9 +63,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    getProximity();
-    getDetectedColor();
-    logToDashboard2(0, ColorChoices.NONE);
+    existsTarget();
+    getHorizontalOffset();
+    isAligned();
+    alignRobot(0.0);
   }
 
   @Override
@@ -164,11 +165,11 @@ public class Robot extends TimedRobot {
    */
   public void alignRobot(double horizontalError) {
     if (getHorizontalOffset() < 0) {
-      leftMotors.set(0.1);
-      rightMotors.set(0.1);
-    } else if (getHorizontalOffset() > 0) {
       leftMotors.set(-0.1);
       rightMotors.set(-0.1);
+    } else if (getHorizontalOffset() > 0) {
+      leftMotors.set(0.1);
+      rightMotors.set(0.1);
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
