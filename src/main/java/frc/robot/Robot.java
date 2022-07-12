@@ -98,15 +98,21 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("GREEEEEEEEN", green);
     SmartDashboard.putNumber("BLUEeee", blue);
 
-    if (Math.max(red, green) == red && Math.max(red, blue) == red) {
+    if (Math.max(red, blue) == red) {
       return ColorChoices.RED;
-    } else if (Math.max(blue, red) == blue && Math.max(blue, green) == blue){
+    } else if (Math.max(blue, red) == blue) {
       return ColorChoices.BLUE;
     } else {
       return ColorChoices.NONE;
     }  
   }
 
+  /*
+  Emojis go here
+  >:)
+  */
+
+  
   /**
    * Logs important color sensor values to SmartDashboard
    * 
@@ -124,7 +130,7 @@ public class Robot extends TimedRobot {
       case NONE:
         SmartDashboard.putString("Color", "None");
       default:
-        SmartDashboard.putString("Color", "None");
+        SmartDashboard.putString("Color", "None")
     }
   }
 
