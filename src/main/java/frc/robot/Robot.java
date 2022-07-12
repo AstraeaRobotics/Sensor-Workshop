@@ -7,8 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.I2C;
+
+import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
 
 import com.revrobotics.ColorSensorV3;
 
@@ -18,9 +26,39 @@ public class Robot extends TimedRobot {
 
   ColorSensorV3 colorSensor;
 
+  NetworkTableInstance instance;
+  NetworkTable colorTable;
+  NetworkTable limelightTable;
+
+  CANSparkMax leftMotor1;
+  CANSparkMax leftMotor2;
+  CANSparkMax leftMotor3;
+  CANSparkMax rightMotor1;
+  CANSparkMax rightMotor2;
+  CANSparkMax rightMotor3;
+
+  PS4Controller joystick;
+
+  MotorControllerGroup leftMotors;
+  MotorControllerGroup rightMotors;
+
   @Override
   public void robotInit() {
     colorSensor = new ColorSensorV3(i2cPort);
+    colorTable = instance.getDefault().getTable("FMSInfo");
+    limelightTable = instance.getDefault().getTable("limelight");
+
+    leftMotor1 = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
+    leftMotor2 = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    leftMotor3 = new CANSparkMax(6, CANSparkMaxLowLevel.MotorType.kBrushless);
+    rightMotor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
+    rightMotor2 = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
+    rightMotor3 = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
+
+    joystick = new PS4Controller(0);
+
+    leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2, leftMotor3);
+    rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2, rightMotor3);
   }
 
   @Override
@@ -34,6 +72,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    if (joystick.getCrossButton()){
+      alignRobot(getHorizontalOffset());
+    }
   }
 
   /* COLOR SENSOR STATION */
@@ -60,14 +101,15 @@ public class Robot extends TimedRobot {
    */
   public ColorChoices getDetectedColor() {
     // TODO write method
+    if (getProximity() < 150) {
+      return ColorChoices.NONE;
+    }
     int blueColorValue = colorSensor.getBlue();
     int redColorValue = colorSensor.getRed();
     if (blueColorValue > redColorValue) {
       return ColorChoices.BLUE;
-    } else if (blueColorValue < redColorValue) {
-      return ColorChoices.RED;
     } else {
-      return ColorChoices.NONE;
+      return ColorChoices.RED;
     }
   }
 
@@ -79,9 +121,20 @@ public class Robot extends TimedRobot {
    */
   public void logToDashboard(int proximity, ColorChoices color) {
     // TODO write method
-    ShuffleboardTab colorTab = Shuffleboard.getTab("Color");
-    colorTab.add("Color", color.toString());
-    colorTab.add("Proximity", proximity);
+    SmartDashboard.putString("Color", color.toString());
+    SmartDashboard.putNumber("Proximity", proximity);
+    SmartDashboard.putBoolean("Right Color", isRightColor());
+    // ShuffleboardTab colorTab = Shuffleboard.getTab("Color");
+    // colorTab.add("Color", color.toString());
+    // colorTab.add("Proximity", proximity);
+  }
+
+  public boolean isRightColor() {
+    if (colorTable.getEntry("isRedAlliance").getBoolean(false)) {
+      return getDetectedColor() == ColorChoices.BLUE;
+    } else {
+      return getDetectedColor() == ColorChoices.RED;
+    }
   }
 
   /* LIMELIGHT STATION */
@@ -93,7 +146,8 @@ public class Robot extends TimedRobot {
    */
   public boolean existsTarget() {
     // TODO write method
-    return false;
+    
+    return limelightTable.getEntry("tv").getDouble(0) == 1;
   }
 
   /**
@@ -104,7 +158,7 @@ public class Robot extends TimedRobot {
    */
   public double getHorizontalOffset() {
     // TODO write method
-    return -1.0;
+    return limelightTable.getEntry("tx").getDouble(0);
   }
 
   /**
@@ -114,7 +168,7 @@ public class Robot extends TimedRobot {
    */
   public boolean isAligned() {
     // TODO write method
-    return false;
+    return (Math.abs(getHorizontalOffset()) <= 5); 
   }
 
   /**
@@ -124,6 +178,13 @@ public class Robot extends TimedRobot {
    */
   public void alignRobot(double horizontalError) {
     // TODO write method
+    if (existsTarget()) {
+      if (!isAligned()) {
+        double rotConstant = 0.001;
+        leftMotors.set(horizontalError * rotConstant);
+        rightMotors.set(horizontalError * rotConstant);
+      }
+    }
   }
 
   /**
