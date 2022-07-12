@@ -79,7 +79,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (joystick.getCrossButton()) {
-      alignRobot(getHorizontalOffset());
+      alignRobot(getHorizontalOffset(), getVerticalOffset());
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
     }
   }
 
@@ -167,13 +170,18 @@ public class Robot extends TimedRobot {
     return limelightTable.getEntry("tx").getDouble(0);
   }
 
+  public double getVerticalOffset() {
+    // TODO write method
+    return limelightTable.getEntry("ty").getDouble(0);
+  }
+
   /**
    * Determines whether or not the robot is aligned with the goal
    * 
    * @return if the robot is aligned with the goal
    */
   public boolean isAligned() {
-    return (Math.abs(getHorizontalOffset()) <= 5);
+    return (Math.abs(getHorizontalOffset()) <= 5) && (Math.abs(getVerticalOffset()) <= 5);
   }
 
   /**
@@ -181,13 +189,16 @@ public class Robot extends TimedRobot {
    * 
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
-  public void alignRobot(double horizontalError) {
+  public void alignRobot(double horizontalError, double verticalError) {
     // TODO write method
     if (existsTarget()) {
       if (!isAligned()) {
-        double rotConstant = 0.001;
-        leftMotors.set(horizontalError * rotConstant);
-        rightMotors.set(horizontalError * rotConstant);
+        double rotConstant = 0.007;
+        leftMotors.set((horizontalError - verticalError) * rotConstant);
+        rightMotors.set((horizontalError + verticalError) * rotConstant);
+      } else {
+        leftMotors.set(0);
+        rightMotors.set(0);
       }
     }
   }
