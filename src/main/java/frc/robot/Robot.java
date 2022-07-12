@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
     // logToDashboard(proximity, color);
 
     //turnToAngle(90);
-    moveDistance(3);
+    moveDistance(-2);
     logToDashboard(odometry.getPoseMeters().getX(), odometry.getPoseMeters().getY(), getHeading());
   }
 
