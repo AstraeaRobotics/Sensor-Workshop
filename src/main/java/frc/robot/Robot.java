@@ -264,6 +264,7 @@ public class Robot extends TimedRobot {
    */
   public void moveDistance(double distance) { //i think we're good
     // TODO write method <3 <3 <3 <3 <3
+    distance = distance/2.1;
     if (getDistanceTraveled() < Math.abs(distance) && distance > 0) {
       leftMotors.set(-0.1);
       rightMotors.set(0.1);
