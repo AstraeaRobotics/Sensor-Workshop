@@ -52,9 +52,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    moveDistance(5);
-    updateOdometry();
-    logToDashboard(0,0,0);
+    
   }
 
   @Override
