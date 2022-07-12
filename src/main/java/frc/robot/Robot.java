@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
     leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2, leftMotor3);
     rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2, rightMotor3);
 
-    // gryo = new AHRwS()
+    gyro = new AHRS();
   }
 
   @Override
@@ -194,8 +194,8 @@ public class Robot extends TimedRobot {
     if (existsTarget()) {
       if (!isAligned()) {
         double rotConstant = 0.007;
-        leftMotors.set((horizontalError - verticalError) * rotConstant);
-        rightMotors.set((horizontalError + verticalError) * rotConstant);
+        leftMotors.set((horizontalError + verticalError) * rotConstant);
+        rightMotors.set((horizontalError - verticalError) * rotConstant);
       } else {
         leftMotors.set(0);
         rightMotors.set(0);
@@ -223,9 +223,7 @@ public class Robot extends TimedRobot {
    * @return the yaw angle in degrees
    */
   public double getHeading() {
-
-    return 0.0;
-
+    return gyro.getAngle();
   }
 
   /**
@@ -234,7 +232,8 @@ public class Robot extends TimedRobot {
    * @param degrees angle in degrees
    */
   public void turnToAngle(double degrees) {
-    // TODO write method
+    leftMotors.set(degrees * 0.01);
+    rightMotors.set(degrees * 0.01);
   }
 
   /**
@@ -244,7 +243,16 @@ public class Robot extends TimedRobot {
    *                 backwards)
    */
   public void moveDistance(double distance) {
-    // TODO write method
+    double currentRevs = leftMotor1.getEncoder().getPosition();
+    double targetRevs = ((distance * 12 * 10.75) / (6 * Math.PI));
+
+    if (currentRevs >= targetRevs) {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    } else {
+      leftMotors.set(0.05);
+      rightMotors.set(-0.05);
+    }
   }
 
   /**
