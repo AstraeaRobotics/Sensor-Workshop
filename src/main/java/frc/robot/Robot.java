@@ -36,7 +36,6 @@ public class Robot extends TimedRobot {
   public static ColorSensorV3 sensor;
   public static I2C.Port I2C;
 
-
   @Override
   public void robotInit() {
     motor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -56,7 +55,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    
+    getProximity();
+    getDetectedColor();
+    logToDashboard2(0, ColorChoices.NONE);
   }
 
   @Override
@@ -85,7 +86,8 @@ public class Robot extends TimedRobot {
 
   /**
    * Determines which color is closest to the color detected by the sensor
-   * @return 
+   * 
+   * @return
    * 
    * @return The color that is closest to what the color sensor detects (RED,
    *         BLUE, OTHER or NONE)
@@ -99,7 +101,7 @@ public class Robot extends TimedRobot {
       return ColorChoices.BLUE;
     else
       return ColorChoices.NONE;
-    }
+  }
 
   /**
    * Logs important color sensor values to SmartDashboard
@@ -154,6 +156,7 @@ public class Robot extends TimedRobot {
   public void alignRobot(double horizontalError) {
     // TODO write method
   }
+
   /**
    * Logs important Limelight values to SmartDashboard
    * 
@@ -193,7 +196,7 @@ public class Robot extends TimedRobot {
       if (currRotat < degrees) {
         leftMotors.set(-0.15);
         rightMotors.set(-0.15);
-      } 
+      }
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
@@ -217,7 +220,7 @@ public class Robot extends TimedRobot {
       if (currPosit < distance) {
         leftMotors.set(-0.15);
         rightMotors.set(0.15);
-      } 
+      }
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
@@ -244,7 +247,7 @@ public class Robot extends TimedRobot {
   public double getDistanceTraveled() {
     double x = odometer.getPoseMeters().getX();
     double y = odometer.getPoseMeters().getY();
-    double hypotenuseSquared = Math.pow(x,2) + Math.pow(y,2);
+    double hypotenuseSquared = Math.pow(x, 2) + Math.pow(y, 2);
     double hypotenuse = Math.pow(hypotenuseSquared, 0.5);
     return hypotenuse;
   }
