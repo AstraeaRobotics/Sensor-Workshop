@@ -29,7 +29,6 @@ public class Robot extends TimedRobot {
   public static DifferentialDriveOdometry odometer;
   public static AHRS gyro;
 
-
   @Override
   public void robotInit() {
     motor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -43,14 +42,15 @@ public class Robot extends TimedRobot {
     gyro = new AHRS();
     odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
     gyro.reset();
-    motor1.getEncoder().setPosition(.0);
+    motor1.getEncoder().setPosition(0);
+    System.out.println("We are farmers.");
   }
 
   @Override
   public void robotPeriodic() {
-    moveDistance(5);
+    // moveDistance(-5);
     updateOdometry();
-    logToDashboard(0,0,0);
+    logToDashboard(0, 0, 0);
   }
 
   @Override
@@ -139,6 +139,7 @@ public class Robot extends TimedRobot {
   public void alignRobot(double horizontalError) {
     // TODO write method
   }
+
   /**
    * Logs important Limelight values to SmartDashboard
    * 
@@ -169,16 +170,19 @@ public class Robot extends TimedRobot {
    */
   public void turnToAngle(double degrees) {
     double currRotat = getHeading();
-    if (degrees < 0) {
+    /*
+     * if (degrees < 0) {
+     * if (currRotat < degrees) {
+     * leftMotors.set(-0.15);
+     * rightMotors.set(-0.15);
+     * }
+     * } else
+     */
+    if (degrees > 0) {
       if (currRotat < degrees) {
         leftMotors.set(0.15);
         rightMotors.set(0.15);
       }
-    } else if (degrees > 0) {
-      if (currRotat < degrees) {
-        leftMotors.set(-0.15);
-        rightMotors.set(-0.15);
-      } 
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
@@ -202,7 +206,7 @@ public class Robot extends TimedRobot {
       if (currPosit < distance) {
         leftMotors.set(-0.15);
         rightMotors.set(0.15);
-      } 
+      }
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
@@ -229,7 +233,7 @@ public class Robot extends TimedRobot {
   public double getDistanceTraveled() {
     double x = odometer.getPoseMeters().getX();
     double y = odometer.getPoseMeters().getY();
-    double hypotenuseSquared = Math.pow(x,2) + Math.pow(y,2);
+    double hypotenuseSquared = Math.pow(x, 2) + Math.pow(y, 2);
     double hypotenuse = Math.pow(hypotenuseSquared, 0.5);
     return hypotenuse;
   }
