@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.lang.Math;
+import com.revrobotics.ColorSensorV3;
+import edu.wpi.first.wpilibj.I2C.Port port;
 
 public class Robot extends TimedRobot {
 
@@ -28,6 +30,8 @@ public class Robot extends TimedRobot {
 
   public static DifferentialDriveOdometry odometer;
   public static AHRS gyro;
+  public static ColorSensorV3 sensor;
+
 
   @Override
   public void robotInit() {
@@ -42,15 +46,15 @@ public class Robot extends TimedRobot {
     gyro = new AHRS();
     odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
     gyro.reset();
-    motor1.getEncoder().setPosition(0);
-    System.out.println("We are farmers.");
+    motor1.getEncoder().setPosition(.0);
+    sensor = new ColorSensorV3();
   }
 
   @Override
   public void robotPeriodic() {
-    // moveDistance(-5);
+    moveDistance(5);
     updateOdometry();
-    logToDashboard(0, 0, 0);
+    logToDashboard(0,0,0);
   }
 
   @Override
@@ -74,7 +78,7 @@ public class Robot extends TimedRobot {
    */
   public int getProximity() {
     // TODO write method
-    return -1;
+    return sensor.getProximity();
   }
 
   /**
@@ -85,7 +89,7 @@ public class Robot extends TimedRobot {
    */
   public ColorChoices getDetectedColor() {
     // TODO write method
-    return null;
+    return sensor.getRawColor();
   }
 
   /**
@@ -96,6 +100,8 @@ public class Robot extends TimedRobot {
    */
   public void logToDashboard(int proximity, ColorChoices color) {
     // TODO write method
+    SmartDashboard.putNumber("Proxmity", sensor.getProximity());
+    SmartDashboard.putNumber("Raw Color", sensor.getRawColor());
   }
 
   /* LIMELIGHT STATION */
@@ -139,7 +145,6 @@ public class Robot extends TimedRobot {
   public void alignRobot(double horizontalError) {
     // TODO write method
   }
-
   /**
    * Logs important Limelight values to SmartDashboard
    * 
@@ -170,19 +175,16 @@ public class Robot extends TimedRobot {
    */
   public void turnToAngle(double degrees) {
     double currRotat = getHeading();
-    /*
-     * if (degrees < 0) {
-     * if (currRotat < degrees) {
-     * leftMotors.set(-0.15);
-     * rightMotors.set(-0.15);
-     * }
-     * } else
-     */
-    if (degrees > 0) {
+    if (degrees < 0) {
       if (currRotat < degrees) {
         leftMotors.set(0.15);
         rightMotors.set(0.15);
       }
+    } else if (degrees > 0) {
+      if (currRotat < degrees) {
+        leftMotors.set(-0.15);
+        rightMotors.set(-0.15);
+      } 
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
@@ -206,7 +208,7 @@ public class Robot extends TimedRobot {
       if (currPosit < distance) {
         leftMotors.set(-0.15);
         rightMotors.set(0.15);
-      }
+      } 
     } else {
       leftMotors.set(0);
       rightMotors.set(0);
@@ -233,7 +235,7 @@ public class Robot extends TimedRobot {
   public double getDistanceTraveled() {
     double x = odometer.getPoseMeters().getX();
     double y = odometer.getPoseMeters().getY();
-    double hypotenuseSquared = Math.pow(x, 2) + Math.pow(y, 2);
+    double hypotenuseSquared = Math.pow(x,2) + Math.pow(y,2);
     double hypotenuse = Math.pow(hypotenuseSquared, 0.5);
     return hypotenuse;
   }
