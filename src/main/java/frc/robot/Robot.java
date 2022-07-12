@@ -250,7 +250,7 @@ public class Robot extends TimedRobot {
       // Reminder: Motors are positioned in opposite directions, so yah
       leftMotors.set(0.05);
       rightMotors.set(0.05);
-    } else if (heading > degrees && degrees < 0) {
+    } else if (heading < degrees && degrees < 0) {
       leftMotors.set(-0.05);
       rightMotors.set(-0.05);
     } else {
