@@ -243,6 +243,7 @@ public class Robot extends TimedRobot {
     // TODO write method
     //use getHeading() here
     double heading = getHeading();
+    SmartDashboard.putNumber("heading", heading);
     if (heading < degrees) {
       // Reminder: Motors are positioned in opposite directions, so yah
       leftMotors.set(0.1);
