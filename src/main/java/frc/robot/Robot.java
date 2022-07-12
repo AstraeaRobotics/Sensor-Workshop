@@ -252,4 +252,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Rotation", gyro.getAngle());
     SmartDashboard.putNumber("Left Encoder", motor1.getEncoder().getPosition());
   }
+
+  public void logToDashboard2(int proximity, ColorChoices color){
+    SmartDashboard.putNumber("Proximity", sensor.getProximity());
+    SmartDashboard.putNumber("Raw Color", sensor.getRawColor());
+  }
 }
