@@ -4,26 +4,72 @@
 
 package frc.robot;
 
+import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.ColorSensorV3;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Robot extends TimedRobot {
 
+  public static CANSparkMax motor1;
+  public static CANSparkMax motor2;
+  public static CANSparkMax motor3;
+  public static CANSparkMax motor4;
+  public static CANSparkMax motor5;
+  public static CANSparkMax motor6;
+
+  public static MotorControllerGroup leftMotors;
+  public static MotorControllerGroup rightMotors;
+
+  public static DifferentialDriveOdometry odometer;
+  public static AHRS gyro;
+  public static ColorSensorV3 sensor;
+  public static I2C.Port I2C;
+
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTableEntry tv = table.getEntry("tv");
+  NetworkTableEntry tx = table.getEntry("tx");
+
   @Override
   public void robotInit() {
+    motor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor2 = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor3 = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor4 = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor5 = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    motor6 = new CANSparkMax(6, CANSparkMaxLowLevel.MotorType.kBrushless);
+    leftMotors = new MotorControllerGroup(motor1, motor2, motor3);
+    rightMotors = new MotorControllerGroup(motor4, motor5, motor6);
+    gyro = new AHRS();
+    odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
+    sensor = new ColorSensorV3(Port.kOnboard);
+
   }
 
   @Override
   public void robotPeriodic() {
+    logToDashboard(0, 0, 0);
   }
 
   @Override
   public void teleopInit() {
+    gyro.reset();
+    motor1.getEncoder().setPosition(0.0);
   }
 
   @Override
   public void teleopPeriodic() {
+    turnToAngle(90);
   }
-
   /* COLOR SENSOR STATION */
 
   public enum ColorChoices {
@@ -37,18 +83,26 @@ public class Robot extends TimedRobot {
    */
   public int getProximity() {
     // TODO write method
-    return -1;
+    return sensor.getProximity();
   }
 
   /**
    * Determines which color is closest to the color detected by the sensor
    * 
+   * @return
+   * 
    * @return The color that is closest to what the color sensor detects (RED,
    *         BLUE, OTHER or NONE)
    */
   public ColorChoices getDetectedColor() {
-    // TODO write method
-    return null;
+    int red = sensor.getRed();
+    int blue = sensor.getBlue();
+    if (red > blue)
+      return ColorChoices.RED;
+    else if (blue > red)
+      return ColorChoices.BLUE;
+    else
+      return ColorChoices.NONE;
   }
 
   /**
@@ -57,8 +111,10 @@ public class Robot extends TimedRobot {
    * @param proximity How close the nearest object is to the sensor
    * @param color     What color is detected by the sensor
    */
-  public void logToDashboard(int proximity, ColorChoices color) {
+  public void logToDashboard2(int proximity, ColorChoices color) {
     // TODO write method
+    SmartDashboard.putNumber("Proxmity", sensor.getProximity());
+    SmartDashboard.putString("Color", getDetectedColor().toString());
   }
 
   /* LIMELIGHT STATION */
@@ -69,8 +125,7 @@ public class Robot extends TimedRobot {
    * @return whether or not a target is visible in the frame
    */
   public boolean existsTarget() {
-    // TODO write method
-    return false;
+    return tv.getBoolean(false);
   }
 
   /**
@@ -80,8 +135,8 @@ public class Robot extends TimedRobot {
    * @return the horizontal offset to the center of the target
    */
   public double getHorizontalOffset() {
-    // TODO write method
-    return -1.0;
+    double xoffset = tx.getDouble(0.0);
+    return xoffset;
   }
 
   /**
@@ -90,8 +145,10 @@ public class Robot extends TimedRobot {
    * @return if the robot is aligned with the goal
    */
   public boolean isAligned() {
-    // TODO write method
-    return false;
+    if (getHorizontalOffset() == 0)
+      return true;
+    else
+      return false;
   }
 
   /**
@@ -100,7 +157,16 @@ public class Robot extends TimedRobot {
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
   public void alignRobot(double horizontalError) {
-    // TODO write method
+    if (getHorizontalOffset() < 0) {
+      leftMotors.set(-0.1);
+      rightMotors.set(-0.1);
+    } else if (getHorizontalOffset() > 0) {
+      leftMotors.set(0.1);
+      rightMotors.set(0.1);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /**
@@ -110,7 +176,7 @@ public class Robot extends TimedRobot {
    * @param existsTarget    whether or not a target is visible in the frame
    * @param horizontalError the horizontal offset to the center of the goal
    */
-  public void logToDashboard(boolean isAligned, boolean existsTarget, double horizontalError) {
+  public void logToDashboard3(boolean isAligned, boolean existsTarget, double horizontalError) {
     // TODO write method
   }
 
@@ -123,8 +189,7 @@ public class Robot extends TimedRobot {
    * @return the yaw angle in degrees
    */
   public double getHeading() {
-    // TODO write method
-    return 0.0;
+    return gyro.getAngle();
   }
 
   /**
@@ -133,8 +198,20 @@ public class Robot extends TimedRobot {
    * @param degrees angle in degrees
    */
   public void turnToAngle(double degrees) {
-    // TODO write method
+    double currRotat = getHeading();
+    degrees = 90;
+    if (currRotat > degrees + 3 || currRotat > degrees - 3) {
+      leftMotors.set(-0.05);
+      rightMotors.set(-0.05);
+    } else if (currRotat < degrees + 3 || currRotat < -3) {
+      leftMotors.set(0.05);
+      rightMotors.set(0.05);
+    } else if (currRotat <= degrees + 5 || currRotat >= degrees - 5) {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
+  // we are bad
 
   /**
    * Moves the robot a specified distance forwards or backwards
@@ -143,7 +220,22 @@ public class Robot extends TimedRobot {
    *                 backwards)
    */
   public void moveDistance(double distance) {
-    // TODO write method
+    double currPosit = motor1.getEncoder().getPosition();
+    if (distance < 0) {
+      if (currPosit < distance) {
+        leftMotors.set(0.15);
+        rightMotors.set(-0.15);
+      }
+    } else if (distance > 0) {
+      if (currPosit < distance) {
+        leftMotors.set(-0.15);
+        rightMotors.set(0.15);
+      }
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
+
   }
 
   /**
@@ -151,7 +243,10 @@ public class Robot extends TimedRobot {
    * 
    */
   public void updateOdometry() {
-    // TODO write method
+    double metersMoved = 0.1524 * Math.PI / 10.81;
+    double positionR = motor4.getEncoder().getPosition();
+    double positionL = motor1.getEncoder().getPosition();
+    odometer.update(gyro.getRotation2d(), positionL * metersMoved, positionR * metersMoved);
   }
 
   /**
@@ -160,14 +255,21 @@ public class Robot extends TimedRobot {
    * @return distance in meters
    */
   public double getDistanceTraveled() {
-    // TODO write method
-    return 0.0;
+    double x = odometer.getPoseMeters().getX();
+    double y = odometer.getPoseMeters().getY();
+    double hypotenuseSquared = Math.pow(x, 2) + Math.pow(y, 2);
+    double hypotenuse = Math.pow(hypotenuseSquared, 0.5);
+    return hypotenuse;
   }
 
   /**
    * Logs important position values to SmartDashboard
    */
   public void logToDashboard(double xPos, double yPos, double rotation) {
-    // TODO write method
+    SmartDashboard.putNumber("x Positon", odometer.getPoseMeters().getX());
+    SmartDashboard.putNumber("y Positon", odometer.getPoseMeters().getY());
+    SmartDashboard.putNumber("Rotation", gyro.getAngle());
+    SmartDashboard.putNumber("Left Encoder", motor1.getEncoder().getPosition());
+    SmartDashboard.putNumber("Current Rotation", getHeading());
   }
 }
