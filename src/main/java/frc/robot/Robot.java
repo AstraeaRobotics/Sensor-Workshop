@@ -5,15 +5,72 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.I2C;
+
+import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+
+import com.revrobotics.ColorSensorV3;
+
+import com.kauailabs.navx.frc.AHRS;
 
 public class Robot extends TimedRobot {
 
+  I2C.Port i2cPort = I2C.Port.kOnboard;
+
+  ColorSensorV3 colorSensor;
+
+  NetworkTableInstance instance;
+  NetworkTable colorTable;
+  NetworkTable limelightTable;
+
+  CANSparkMax leftMotor1;
+  CANSparkMax leftMotor2;
+  CANSparkMax leftMotor3;
+  CANSparkMax rightMotor1;
+  CANSparkMax rightMotor2;
+  CANSparkMax rightMotor3;
+
+  PS4Controller joystick;
+
+  MotorControllerGroup leftMotors;
+  MotorControllerGroup rightMotors;
+
+  AHRS gyro;
+
   @Override
   public void robotInit() {
+    colorSensor = new ColorSensorV3(i2cPort);
+    colorTable = instance.getDefault().getTable("FMSInfo");
+    limelightTable = instance.getDefault().getTable("limelight");
+
+    leftMotor1 = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
+    leftMotor2 = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    leftMotor3 = new CANSparkMax(6, CANSparkMaxLowLevel.MotorType.kBrushless);
+    rightMotor1 = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
+    rightMotor2 = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
+    rightMotor3 = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
+
+    joystick = new PS4Controller(0);
+
+    leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2, leftMotor3);
+    rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2, rightMotor3);
+
+    gyro = new AHRS();
   }
 
   @Override
   public void robotPeriodic() {
+    logToDashboard(getProximity(), getDetectedColor());
+    logToDashboard(x, , getHeading());
   }
 
   @Override
@@ -22,6 +79,27 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    if (joystick.getCrossButton()) {
+      alignRobot(getHorizontalOffset(), getVerticalOffset());
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
+
+    if (joystick.getCircleButton()) {
+      moveDistance(5);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
+
+    if (joystick.getTriangleButton()) {
+      gyro.reset();
+      turnToAngle(25);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /* COLOR SENSOR STATION */
@@ -37,7 +115,7 @@ public class Robot extends TimedRobot {
    */
   public int getProximity() {
     // TODO write method
-    return -1;
+    return colorSensor.getProximity();
   }
 
   /**
@@ -48,7 +126,16 @@ public class Robot extends TimedRobot {
    */
   public ColorChoices getDetectedColor() {
     // TODO write method
-    return null;
+    if (getProximity() < 150) {
+      return ColorChoices.NONE;
+    }
+    int blueColorValue = colorSensor.getBlue();
+    int redColorValue = colorSensor.getRed();
+    if (blueColorValue > redColorValue) {
+      return ColorChoices.BLUE;
+    } else {
+      return ColorChoices.RED;
+    }
   }
 
   /**
@@ -59,6 +146,17 @@ public class Robot extends TimedRobot {
    */
   public void logToDashboard(int proximity, ColorChoices color) {
     // TODO write method
+    SmartDashboard.putString("Color", color.toString());
+    SmartDashboard.putNumber("Proximity", proximity);
+    SmartDashboard.putBoolean("Right Color", isRightColor());
+  }
+
+  public boolean isRightColor() {
+    if (colorTable.getEntry("isRedAlliance").getBoolean(false)) {
+      return getDetectedColor() == ColorChoices.BLUE;
+    } else {
+      return getDetectedColor() == ColorChoices.RED;
+    }
   }
 
   /* LIMELIGHT STATION */
@@ -70,7 +168,8 @@ public class Robot extends TimedRobot {
    */
   public boolean existsTarget() {
     // TODO write method
-    return false;
+
+    return limelightTable.getEntry("tv").getDouble(0) == 1;
   }
 
   /**
@@ -81,7 +180,12 @@ public class Robot extends TimedRobot {
    */
   public double getHorizontalOffset() {
     // TODO write method
-    return -1.0;
+    return limelightTable.getEntry("tx").getDouble(0);
+  }
+
+  public double getVerticalOffset() {
+    // TODO write method
+    return limelightTable.getEntry("ty").getDouble(0);
   }
 
   /**
@@ -90,8 +194,7 @@ public class Robot extends TimedRobot {
    * @return if the robot is aligned with the goal
    */
   public boolean isAligned() {
-    // TODO write method
-    return false;
+    return (Math.abs(getHorizontalOffset()) <= 5) && (Math.abs(getVerticalOffset()) <= 5);
   }
 
   /**
@@ -99,8 +202,18 @@ public class Robot extends TimedRobot {
    * 
    * @param horizontalError the horizontal offset (as reported by limelight)
    */
-  public void alignRobot(double horizontalError) {
+  public void alignRobot(double horizontalError, double verticalError) {
     // TODO write method
+    if (existsTarget()) {
+      if (!isAligned()) {
+        double rotConstant = 0.007;
+        leftMotors.set((horizontalError + verticalError) * rotConstant);
+        rightMotors.set((horizontalError - verticalError) * rotConstant);
+      } else {
+        leftMotors.set(0);
+        rightMotors.set(0);
+      }
+    }
   }
 
   /**
@@ -123,8 +236,7 @@ public class Robot extends TimedRobot {
    * @return the yaw angle in degrees
    */
   public double getHeading() {
-    // TODO write method
-    return 0.0;
+    return gyro.getAngle();
   }
 
   /**
@@ -133,7 +245,17 @@ public class Robot extends TimedRobot {
    * @param degrees angle in degrees
    */
   public void turnToAngle(double degrees) {
-    // TODO write method
+    if (getHeading() <= degrees) {
+      leftMotors.set(0.05);
+      rightMotors.set(0.05);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
+  }
+
+  public double getCurrentPosition() {
+    return leftMotor1.getEncoder().getPosition();
   }
 
   /**
@@ -143,7 +265,16 @@ public class Robot extends TimedRobot {
    *                 backwards)
    */
   public void moveDistance(double distance) {
-    // TODO write method
+    double currentRevs = getCurrentPosition();
+    double targetRevs = ((distance * 12 * 10.75) / (6 * Math.PI));
+
+    if (currentRevs <= targetRevs) {
+      leftMotors.set(0.05);
+      rightMotors.set(-0.05);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /**
@@ -167,7 +298,9 @@ public class Robot extends TimedRobot {
   /**
    * Logs important position values to SmartDashboard
    */
-  public void logToDashboard(double xPos, double yPos, double rotation) {
+  public void logToDashboard(double revs, double rotation) {
     // TODO write method
+    SmartDashboard.putNumber("Revolutions", getCurrentPosition());
+    SmartDashboard.putNumber("Rotation", rotation);
   }
 }
