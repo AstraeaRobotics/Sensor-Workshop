@@ -91,6 +91,14 @@ public class Robot extends TimedRobot {
       leftMotors.set(0);
       rightMotors.set(0);
     }
+
+    if (joystick.getTriangleButton()) {
+      gyro.reset();
+      turnToAngle(25);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /* COLOR SENSOR STATION */
@@ -239,8 +247,13 @@ public class Robot extends TimedRobot {
    * @param degrees angle in degrees
    */
   public void turnToAngle(double degrees) {
-    leftMotors.set(degrees * 0.01);
-    rightMotors.set(degrees * 0.01);
+    if (getHeading() <= degrees) {
+      leftMotors.set(0.05);
+      rightMotors.set(0.05);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
+    }
   }
 
   /**
@@ -253,12 +266,12 @@ public class Robot extends TimedRobot {
     double currentRevs = leftMotor1.getEncoder().getPosition();
     double targetRevs = ((distance * 12 * 10.75) / (6 * Math.PI));
 
-    if (currentRevs >= targetRevs) {
-      leftMotors.set(0);
-      rightMotors.set(0);
-    } else {
+    if (currentRevs <= targetRevs) {
       leftMotors.set(0.05);
       rightMotors.set(-0.05);
+    } else {
+      leftMotors.set(0);
+      rightMotors.set(0);
     }
   }
 
