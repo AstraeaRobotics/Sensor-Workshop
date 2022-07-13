@@ -63,10 +63,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    existsTarget();
-    getHorizontalOffset();
-    isAligned();
-    alignRobot(0.0);
+    moveDistance(2.71818);
+    turnToAngle(180);
   }
 
   @Override
