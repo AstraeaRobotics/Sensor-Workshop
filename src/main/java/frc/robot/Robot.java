@@ -70,6 +70,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     logToDashboard(getProximity(), getDetectedColor());
+    logToDashboard(x, , getHeading());
   }
 
   @Override
@@ -148,9 +149,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putString("Color", color.toString());
     SmartDashboard.putNumber("Proximity", proximity);
     SmartDashboard.putBoolean("Right Color", isRightColor());
-    // ShuffleboardTab colorTab = Shuffleboard.getTab("Color");
-    // colorTab.add("Color", color.toString());
-    // colorTab.add("Proximity", proximity);
   }
 
   public boolean isRightColor() {
@@ -256,6 +254,10 @@ public class Robot extends TimedRobot {
     }
   }
 
+  public double getCurrentPosition() {
+    return leftMotor1.getEncoder().getPosition();
+  }
+
   /**
    * Moves the robot a specified distance forwards or backwards
    * 
@@ -263,7 +265,7 @@ public class Robot extends TimedRobot {
    *                 backwards)
    */
   public void moveDistance(double distance) {
-    double currentRevs = leftMotor1.getEncoder().getPosition();
+    double currentRevs = getCurrentPosition();
     double targetRevs = ((distance * 12 * 10.75) / (6 * Math.PI));
 
     if (currentRevs <= targetRevs) {
@@ -296,7 +298,9 @@ public class Robot extends TimedRobot {
   /**
    * Logs important position values to SmartDashboard
    */
-  public void logToDashboard(double xPos, double yPos, double rotation) {
+  public void logToDashboard(double revs, double rotation) {
     // TODO write method
+    SmartDashboard.putNumber("Revolutions", getCurrentPosition());
+    SmartDashboard.putNumber("Rotation", rotation);
   }
 }
