@@ -51,12 +51,7 @@ public class Robot extends TimedRobot {
   DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(gyro.getRotation2d());
 
   @Override
-  public void robotInit() {
-    gyro.reset();
-    rightMEnc.setPosition(0.0);
-    leftMEnc.setPosition(0.0);
-    SmartDashboard.putNumber("gyro", gyro.getAngle());
-  }
+  public void robotInit() {  }
 
   @Override
   public void robotPeriodic() {
@@ -65,10 +60,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    gyro.reset();
+    rightMEnc.setPosition(0.0);
+    leftMEnc.setPosition(0.0);
+    SmartDashboard.putNumber("gyro", gyro.getAngle());
   }
 
   @Override
   public void teleopPeriodic() {
+    SmartDashboard.putNumber("gyro", gyro.getAngle());
     // if (!isAligned()) {
     //   alignRobot(getHorizontalOffset());
     // } else {
