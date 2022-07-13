@@ -130,6 +130,7 @@ public class Robot extends TimedRobot {
   Emojis go here
   >:)
   \(^V^)/
+  ;)
   */
 
   
@@ -246,7 +247,8 @@ public class Robot extends TimedRobot {
     //use getHeading() here
     double heading = getHeading();
     SmartDashboard.putNumber("heading", heading);
-    if (degrees-5 <= heading && heading <= degrees+5) {
+    double magicNumber = 3;
+    if (degrees-magicNumber <= heading && heading <= degrees+magicNumber) {
       leftMotors.set(0);
       rightMotors.set(0);
       return;
