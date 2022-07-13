@@ -1,6 +1,9 @@
 {
   "NetworkTables": {
     "SmartDashboard": {
+      "DB": {
+        "open": true
+      },
       "open": true
     },
     "types": {
