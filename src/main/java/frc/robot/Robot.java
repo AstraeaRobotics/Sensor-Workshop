@@ -51,26 +51,25 @@ public class Robot extends TimedRobot {
     rightMotors = new MotorControllerGroup(motor4, motor5, motor6);
     gyro = new AHRS();
     odometer = new DifferentialDriveOdometry(gyro.getRotation2d());
-    gyro.reset();
-    motor1.getEncoder().setPosition(0.0);
     sensor = new ColorSensorV3(Port.kOnboard);
 
   }
 
   @Override
   public void robotPeriodic() {
-    moveDistance(2.71818);
-    turnToAngle(180);
+    logToDashboard(0, 0, 0);
   }
 
   @Override
   public void teleopInit() {
+    gyro.reset();
+    motor1.getEncoder().setPosition(0.0);
   }
 
   @Override
   public void teleopPeriodic() {
+    turnToAngle(90);
   }
-
   /* COLOR SENSOR STATION */
 
   public enum ColorChoices {
@@ -177,7 +176,7 @@ public class Robot extends TimedRobot {
    * @param existsTarget    whether or not a target is visible in the frame
    * @param horizontalError the horizontal offset to the center of the goal
    */
-  public void logToDashboard(boolean isAligned, boolean existsTarget, double horizontalError) {
+  public void logToDashboard3(boolean isAligned, boolean existsTarget, double horizontalError) {
     // TODO write method
   }
 
@@ -200,21 +199,19 @@ public class Robot extends TimedRobot {
    */
   public void turnToAngle(double degrees) {
     double currRotat = getHeading();
-    if (degrees < 0) {
-      if (currRotat < degrees) {
-        leftMotors.set(0.15);
-        rightMotors.set(0.15);
-      }
-    } else if (degrees > 0) {
-      if (currRotat < degrees) {
-        leftMotors.set(-0.15);
-        rightMotors.set(-0.15);
-      }
-    } else {
+    degrees = 90;
+    if (currRotat > degrees + 3 || currRotat > degrees - 3) {
+      leftMotors.set(-0.05);
+      rightMotors.set(-0.05);
+    } else if (currRotat < degrees + 3 || currRotat < -3) {
+      leftMotors.set(0.05);
+      rightMotors.set(0.05);
+    } else if (currRotat <= degrees + 5 || currRotat >= degrees - 5) {
       leftMotors.set(0);
       rightMotors.set(0);
     }
   }
+  // we are bad
 
   /**
    * Moves the robot a specified distance forwards or backwards
@@ -273,5 +270,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("y Positon", odometer.getPoseMeters().getY());
     SmartDashboard.putNumber("Rotation", gyro.getAngle());
     SmartDashboard.putNumber("Left Encoder", motor1.getEncoder().getPosition());
+    SmartDashboard.putNumber("Current Rotation", getHeading());
   }
 }
